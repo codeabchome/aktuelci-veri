@@ -1,0 +1,43 @@
+name: ayna
+
+on:
+  schedule:
+    - cron: "47 * * * *"   # saatte bir
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ayna
+  cancel-in-progress: false
+
+jobs:
+  ayna:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Onceki yayin
+        uses: actions/checkout@v5
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: onceki
+
+      - name: Kopyala
+        id: ayna
+        run: python ayna.py
+
+      - name: Yayinla
+        if: steps.ayna.outputs.degisti == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./site
+          force_orphan: true
+          user_name: "aktuelci-ayna"
+          user_email: "aktuelci-ayna@users.noreply.github.com"
+          commit_message: "veri"
